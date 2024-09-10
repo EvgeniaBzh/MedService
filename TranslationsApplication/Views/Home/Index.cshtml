@@ -1,0 +1,64 @@
+﻿
+@{
+    ViewData["Title"] = "Smart raccoon";
+}
+<html>
+    <head>
+        <style>
+        html {
+            position: relative;
+            min-height: 100%;
+            font-size: 16px;
+        }
+
+            @@media (min-width: 768px) {
+                html {
+                    font-size: 16px;
+                }
+            }
+
+            .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+                box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+            }         
+
+            body {
+                margin-bottom: 60px;
+                background: url('ffonn1.jpg') no-repeat center center;
+                background-size: cover;
+                background-position: center;
+                min-height: 100vh;  
+            }
+
+            .buttons-container {
+                padding-top: 174px;
+            }
+
+            .btn-primary, .btn-secondary {
+                background-color: white;
+                color: #4A0D5B;
+                border: 1px solid transparent;
+            }
+
+            .btn-primary:hover, .btn-secondary:hover {
+                background-color: #888787;
+                color: white;
+            }
+
+            .btn-primary:hover, .btn-secondary:hover {
+                color: white;
+            }
+
+        </style>
+    </head>
+    <body>
+    <div class="text-center background-image">
+
+        <div class="text-center background-image buttons-container">
+            <a class="btn btn-primary" href="@Url.Action("Index", "Orders")">View orders</a>
+            <a class="btn btn-secondary" href="@Url.Action("Index", "Topics")">View topics</a>
+            <a class="btn btn-secondary" href="@Url.Action("Index", "Types")">View types</a>
+            <a class="btn btn-secondary" href="@Url.Action("Index", "Languages")">View languages</a>                       
+        </div>
+    </div>
+    </body>
+</html>

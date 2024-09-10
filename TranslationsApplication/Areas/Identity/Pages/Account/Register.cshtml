@@ -1,0 +1,167 @@
+﻿@page
+@model RegisterModel
+@{
+    ViewData["Title"] = "Register";
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+
+<style>
+    html {
+        position: relative;
+        min-height: 100%;
+        font-size: 16px;
+    }
+
+    @@media (min-width: 768px) {
+        html {
+            font-size: 16px;
+        }
+    }
+
+    .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+        box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+    }
+
+    body {
+        margin-bottom: 60px;
+        background: url('../../css/ffonn3.jpg') no-repeat center center;
+        background-size: cover;
+        background-position: center;
+        min-height: 100vh;
+    }
+
+    .buttons-container {
+        padding-top: 174px;
+    }
+
+    .btn-primary, .btn-secondary {
+        background-color: white;
+        color: #4A0D5B;
+        border: 1px solid transparent;
+    }
+
+        .btn-primary:hover, .btn-secondary:hover {
+            background-color: #888787;
+            color: white;
+        }
+
+        .btn-primary:hover, .btn-secondary:hover {
+            color: white;
+        }
+
+    .centered-form-container {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        height: 100vh;
+        margin-top: 20px;
+    }
+
+    #registerForm {
+        margin-top: -100px;
+        width: 1000%;
+        max-width: 500px;
+        padding: 15px;
+        margin: auto;
+    }
+
+    .centered-title {
+        display: flex;
+        justify-content: center;
+        margin-top: 60px;
+    }
+
+</style>
+
+<div class="centered-title">
+    <h1>@ViewData["Title"]</h1>
+</div>
+
+<div class="centered-form-container">
+    <div class="row">
+        <div class="col-md-4">
+            <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                <h2>Create a new account.</h2>
+                <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+                <div class="form-floating mb-3">
+                    <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
+                    <label asp-for="Input.Email">Email</label>
+                    <span asp-validation-for="Input.Email" class="text-danger"></span>
+                </div>
+                <div class="form-floating mb-3 position-relative">
+                    <input type="password" asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" id="passwordInput" />
+                    <label asp-for="Input.Password">Password</label>
+                    <span asp-validation-for="Input.Password" class="text-danger"></span>
+                    <i class="fas fa-eye password-toggle-icon" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;"></i>
+                </div>
+
+                <div class="form-floating mb-3 position-relative">
+                    <input type="password" asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" id="confirmPasswordInput" />
+                    <label asp-for="Input.ConfirmPassword">Confirm Password</label>
+                    <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+                    <i class="fas fa-eye confirm-password-toggle-icon" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;"></i>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Input.Role"></label>
+                    <select asp-for="Input.Role" class="form-control">
+                        <option value="Customer">Customer</option>
+                        <option value="Translator">Translator</option>
+                    </select>
+                </div>
+
+                <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
+            </form>
+        </div>
+        <div class="col-md-6 col-md-offset-2">
+            <section>
+
+                @{
+                    if ((Model.ExternalLogins?.Count ?? 0) == 0)
+                    {
+                        <div>
+                        </div>
+                    }
+                    else
+                    {
+                        <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
+                            <div>
+                                <p>
+                                    @foreach (var provider in Model.ExternalLogins!)
+                                    {
+                                        <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">@provider.DisplayName</button>
+                                    }
+                                </p>
+                            </div>
+                        </form>
+                    }
+                }     
+            </section>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const togglePasswordIcon = document.querySelector('.password-toggle-icon');
+        const passwordInput = document.getElementById('passwordInput');
+
+        togglePasswordIcon.addEventListener('click', function (e) {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            this.classList.toggle('fa-eye-slash');
+        });
+
+        const toggleConfirmPasswordIcon = document.querySelector('.confirm-password-toggle-icon');
+        const confirmPasswordInput = document.getElementById('confirmPasswordInput');
+
+        toggleConfirmPasswordIcon.addEventListener('click', function (e) {
+            const type = confirmPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            confirmPasswordInput.setAttribute('type', type);
+            this.classList.toggle('fa-eye-slash');
+        });
+    });
+</script>
