@@ -5,9 +5,13 @@ using System.Reflection;
 using MedService.Data.Identity;
 using MedService.Extensions;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using MedService.Infrastructure.Services;
 using MedService.Controllers;
 using Microsoft.AspNetCore.Localization;
 using System.Globalization;
+using MedService.Data.Identity;
+using MedService.Extensions;
+using MedService.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,6 +41,8 @@ builder.Services.AddAuthentication(options =>
     options.AccessDeniedPath = "/Account/AccessDenied";
 
 });
+
+builder.Services.AddSingleton<IEmailSender, EmailSender>();
 
 var app = builder.Build();
 

@@ -13,7 +13,7 @@ public partial class Doctor
 
     public string DoctorPassword { get; set; } = null!;
 
-    public string DoctorPhoto { get; set; } = null!;
+    public string? DoctorPhoto { get; set; } = null!;
 
     public int? SpecializationId { get; set; } = null!;
 
