@@ -5,7 +5,7 @@ namespace MedService.Models;
 
 public partial class Doctor
 {
-    public string DoctorId { get; set; }
+    public string DoctorId { get; set; } = Guid.NewGuid().ToString();
 
     public string DoctorName { get; set; } = null!;
 

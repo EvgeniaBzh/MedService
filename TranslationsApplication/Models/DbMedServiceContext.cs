@@ -47,8 +47,9 @@ public partial class DbMedServiceContext : DbContext
             entity.Property(e => e.Day)
                   .IsRequired();
 
-            entity.Property(e => e.StartTime)
+            entity.Property(e => e.Date)
                   .IsRequired();
+
 
             entity.Property(e => e.IsAvailable)
                   .IsRequired();

@@ -10,9 +10,9 @@ public partial class Availability
 
     public DayOfWeek Day { get; set; }
 
-    public TimeSpan StartTime { get; set; }
-
     public bool IsAvailable { get; set; }
+
+    public DateTime Date { get; set; } 
 
     public virtual ICollection<DoctorAvailability> DoctorAvailabilities { get; set; } = new List<DoctorAvailability>();
 }

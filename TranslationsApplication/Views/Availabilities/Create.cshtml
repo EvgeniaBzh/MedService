@@ -1,0 +1,47 @@
+﻿@model MedService.Models.Availability
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+
+<h4>Availability</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create" method="post">
+            <div>
+                <label>Day of the week</label>
+                <select name="day">
+                    <option value="0">Sunday</option>
+                    <option value="1">Monday</option>
+                    <option value="2">Tuesday</option>
+                    <option value="3">Wednesday</option>
+                    <option value="4">Thursday</option>
+                    <option value="5">Friday</option>
+                    <option value="6">Saturday</option>
+                </select>
+            </div>
+            <div>
+                <label>Start Time (hour)</label>
+                <input type="number" name="startTime" min="0" max="23" />
+            </div>
+            <div>
+                <label>End Time (hour)</label>
+                <input type="number" name="endTime" min="1" max="24" />
+            </div>
+            <button type="submit">Create Availabilities</button>
+        </form>
+
+
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
