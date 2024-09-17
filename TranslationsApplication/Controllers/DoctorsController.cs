@@ -121,8 +121,6 @@ namespace MedService.Controllers
             return View(doctor);
         }
 
-
-
         // GET: Doctors/Edit/5
         public async Task<IActionResult> Edit(string id)
         {
@@ -131,24 +129,36 @@ namespace MedService.Controllers
                 return NotFound();
             }
 
-            var doctor = await _context.Doctors.FindAsync(id);
+            var doctor = await _context.Doctors
+                .Include(d => d.DoctorAvailabilities)  // Include DoctorAvailabilities to preselect the checkboxes
+                .FirstOrDefaultAsync(d => d.DoctorId == id);
+
             if (doctor == null)
             {
                 return NotFound();
             }
 
-            ViewData["SpecializationId"] = new SelectList(_context.Specializations,"SpecializationId", "SpecializationName", doctor.SpecializationId);
+            // Отримати список спеціалізацій і доступних годин
+            ViewData["SpecializationId"] = new SelectList(_context.Specializations, "SpecializationId", "SpecializationName", doctor.SpecializationId);
+
+            // Перевірка, чи є доступні години в базі даних
+            var availabilities = await _context.Availabilities.ToListAsync();
+            if (availabilities == null || !availabilities.Any())
+            {
+                // Обробка випадку, якщо немає доступних годин
+                ModelState.AddModelError(string.Empty, "No available hours found.");
+                return View(doctor);
+            }
+
+            ViewBag.Availabilities = availabilities;
 
             return View(doctor);
         }
 
-
         // POST: Doctors/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, [Bind("DoctorId,DoctorName,DoctorEmail,DoctorPassword,DoctorPhoto,SpecializationId")] Doctor doctor)
+        public async Task<IActionResult> Edit(string id, [Bind("DoctorId,DoctorName,SpecializationId")] Doctor doctor, string[] AvailableHours)
         {
             if (id != doctor.DoctorId)
             {
@@ -159,18 +169,34 @@ namespace MedService.Controllers
             {
                 try
                 {
-                    // Check if the new email is already used by another doctor
-                    var emailExists = await _context.Doctors
-                        .AnyAsync(d => d.DoctorEmail == doctor.DoctorEmail && d.DoctorId != doctor.DoctorId);
+                    var existingDoctor = await _context.Doctors
+                        .Include(d => d.DoctorAvailabilities)
+                        .FirstOrDefaultAsync(d => d.DoctorId == id);
 
-                    if (emailExists)
+                    if (existingDoctor == null)
                     {
-                        ModelState.AddModelError("DoctorEmail", "A doctor with this email already exists.");
-                        ViewData["SpecializationId"] = new SelectList(_context.Specializations, "SpecializationId", "SpecializationName", doctor.SpecializationId);
-                        return View(doctor);
+                        return NotFound();
                     }
 
-                    _context.Update(doctor);
+                    // Update name and specialization only
+                    existingDoctor.DoctorName = doctor.DoctorName;
+                    existingDoctor.SpecializationId = doctor.SpecializationId;
+
+                    // Видалити попередні години
+                    existingDoctor.DoctorAvailabilities.Clear();
+
+                    // Додати вибрані години
+                    foreach (var availabilityId in AvailableHours)
+                    {
+                        var doctorAvailability = new DoctorAvailability
+                        {
+                            DoctorId = existingDoctor.DoctorId,
+                            AvailabilityId = availabilityId
+                        };
+                        existingDoctor.DoctorAvailabilities.Add(doctorAvailability);
+                    }
+
+                    _context.Update(existingDoctor);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)

@@ -9,9 +9,9 @@ public partial class Doctor
 
     public string DoctorName { get; set; } = null!;
 
-    public string DoctorEmail { get; set; } = null!;
+    public string? DoctorEmail { get; set; } = null!;
 
-    public string DoctorPassword { get; set; } = null!;
+    public string? DoctorPassword { get; set; } = null!;
 
     public string? DoctorPhoto { get; set; } = null!;
 

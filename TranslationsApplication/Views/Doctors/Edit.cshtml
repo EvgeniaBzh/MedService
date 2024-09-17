@@ -20,12 +20,12 @@
             </div>
             <div class="form-group">
                 <label asp-for="DoctorEmail" class="control-label"></label>
-                <input asp-for="DoctorEmail" class="form-control" />
+                <input asp-for="DoctorEmail" class="form-control" readonly />
                 <span asp-validation-for="DoctorEmail" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="DoctorPassword" class="control-label"></label>
-                <input asp-for="DoctorPassword" class="form-control" />
+                <input asp-for="DoctorPassword" class="form-control" readonly />
                 <span asp-validation-for="DoctorPassword" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -39,6 +39,28 @@
                 <span asp-validation-for="SpecializationId" class="text-danger"></span>
             </div>
             <div class="form-group">
+                <label>Select Available Hours</label>
+                <div>
+                    @if (ViewBag.Availabilities != null)
+                    {
+                        @foreach (var availability in ViewBag.Availabilities as List<MedService.Models.Availability>)
+                        {
+                            <div>
+                                <input type="checkbox" name="AvailableHours" value="@availability.AvailabilityId"
+                                @(Model.DoctorAvailabilities.Any(da => da.AvailabilityId == availability.AvailabilityId) ? "checked" : "") />
+                                <label>@availability.Day @availability.Date.ToShortTimeString()</label>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p>No available hours to select.</p>
+                    }
+                </div>
+            </div>
+
+
+            <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
             </div>
         </form>
@@ -46,9 +68,11 @@
 </div>
 
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Index" asp-controller="Home">Back to Home</a>
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

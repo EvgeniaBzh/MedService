@@ -1,0 +1,27 @@
+﻿@model MedService.Models.Doctor
+
+@{
+    ViewData["Title"] = "Doctor Account";
+}
+
+<h2>Doctor Account</h2>
+
+<form asp-action="UpdateDoctor" method="post" enctype="multipart/form-data">
+    <div class="form-group">
+        <label asp-for="DoctorName" class="control-label"></label>
+        <input asp-for="DoctorName" class="form-control" />
+        <span asp-validation-for="DoctorName" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="DoctorPhoto" class="control-label"></label>
+        <input asp-for="DoctorPhoto" type="file" class="form-control" />
+        <span asp-validation-for="DoctorPhoto" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="SpecializationId" class="control-label"></label>
+        <select asp-for="SpecializationId" class="form-control">
+        </select>
+        <span asp-validation-for="SpecializationId" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">Save Changes</button>
+</form>
