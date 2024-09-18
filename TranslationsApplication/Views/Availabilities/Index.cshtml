@@ -9,19 +9,31 @@
 <p>
     <a asp-action="Create">Create New</a>
 </p>
+
 <table class="table">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Day)
+                @Html.DisplayNameFor(model => model.First().Day)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.IsAvailable)
+                @Html.DisplayNameFor(model => model.First().Date) 
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-        
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Day</td>
+                <td>@item.Date.ToShortDateString()</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.AvailabilityId">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.AvailabilityId">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.AvailabilityId">Delete</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>

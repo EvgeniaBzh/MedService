@@ -10,38 +10,71 @@
     <h4>Doctor</h4>
     <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.DoctorName)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.DoctorName)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.DoctorEmail)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.DoctorEmail)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.DoctorPassword)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.DoctorPassword)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.DoctorPhoto)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.DoctorPhoto)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Specialization)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Specialization.SpecializationId)
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Specialization.SpecializationName)
         </dd>
     </dl>
 </div>
+
+<div>
+    <h4>Available Times</h4>
+    <form asp-action="BookAppointment">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Day</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Select</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var availability in ViewBag.AvailableTimes as List<DoctorAvailability>)
+                {
+                    <tr>
+                        <td>@availability.Availability.Day</td>
+                        <td>@availability.Availability.Date.ToShortDateString()</td> <!-- Display the date -->
+                        <td>@availability.Availability.Date.ToShortTimeString()</td> <!-- Display the time -->
+                        <td>
+                            <input type="radio" name="selectedAvailabilityId" value="@availability.AvailabilityId" />
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <input type="hidden" name="doctorId" value="@Model.DoctorId" />
+        <input type="hidden" name="patientId" value="@ViewBag.PatientId" />
+        <button type="submit" class="btn btn-primary">Book Appointment</button>
+    </form>
+</div>
+
 <div>
     <a asp-action="Edit" asp-route-id="@Model?.DoctorId">Edit</a> |
     <a asp-action="Index">Back to List</a>

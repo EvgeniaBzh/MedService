@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Text.Encodings.Web;
 using System.Text;
+using System.Security.Claims;
 
 namespace MedService.Controllers
 {
@@ -30,15 +31,13 @@ namespace MedService.Controllers
         {
             var dbMedServiceContext = _context.Doctors.Include(d => d.Specialization);
 
-            // Завантажуємо дані
             var doctors = await dbMedServiceContext.ToListAsync();
 
-            // Обробляємо можливі null значення
             foreach (var doctor in doctors)
             {
                 if (doctor.Specialization == null)
                 {
-                    doctor.Specialization = new Specialization(); // або обробка іншого способу
+                    doctor.Specialization = new Specialization(); 
                 }
             }
 
@@ -57,14 +56,53 @@ namespace MedService.Controllers
 
             var doctor = await _context.Doctors
                 .Include(d => d.Specialization)
+                .Include(d => d.DoctorAvailabilities)
+                    .ThenInclude(da => da.Availability)
                 .FirstOrDefaultAsync(m => m.DoctorId == id);
+
             if (doctor == null)
             {
                 return NotFound();
             }
 
+            // Filter availabilities where PatientId is null
+            var availableTimes = doctor.DoctorAvailabilities
+                .Where(da => da.PatientId == null)
+                .ToList();
+
+            ViewBag.AvailableTimes = availableTimes;
+
+            // Get the current logged-in patient's ID (if available)
+            var patientId = User.FindFirstValue(ClaimTypes.NameIdentifier); // or however you store the patient ID
+
+            ViewBag.PatientId = patientId;
+
             return View(doctor);
         }
+
+        [HttpPost]
+        public async Task<IActionResult> BookAppointment(string doctorId, string patientId, string selectedAvailabilityId)
+        {
+            if (string.IsNullOrEmpty(doctorId) || string.IsNullOrEmpty(patientId) || string.IsNullOrEmpty(selectedAvailabilityId))
+            {
+                return BadRequest();
+            }
+
+            var availability = await _context.DoctorAvailabilities
+                .FirstOrDefaultAsync(da => da.DoctorId == doctorId && da.AvailabilityId == selectedAvailabilityId);
+
+            if (availability == null || availability.PatientId != null)
+            {
+                return NotFound(); // or appropriate error message
+            }
+
+            availability.PatientId = patientId;
+            _context.DoctorAvailabilities.Update(availability);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Details", new { id = doctorId });
+        }
+
 
         // GET: Doctors/Create
         public IActionResult Create()
@@ -80,7 +118,6 @@ namespace MedService.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Check if a doctor with the same email already exists
                 var doctorExists = await _context.Doctors.AnyAsync(d => d.DoctorEmail == doctor.DoctorEmail);
                 if (doctorExists)
                 {
@@ -89,19 +126,15 @@ namespace MedService.Controllers
                     return View(doctor);
                 }
 
-                // Створення нового користувача в системі Identity
                 var user = new ApplicationUser { UserName = doctor.DoctorEmail, Email = doctor.DoctorEmail };
                 var result = await _userManager.CreateAsync(user, doctor.DoctorPassword);
 
                 if (result.Succeeded)
                 {
-                    // Призначення ролі "doctor"
                     await _userManager.AddToRoleAsync(user, "doctor");
 
-                    // Присвоєння DoctorId користувачу
                     doctor.DoctorId = user.Id;
 
-                    // Додавання лікаря до бази даних
                     _context.Add(doctor);
                     await _context.SaveChangesAsync();
 
@@ -109,7 +142,6 @@ namespace MedService.Controllers
                 }
                 else
                 {
-                    // Виведення помилок створення користувача
                     foreach (var error in result.Errors)
                     {
                         ModelState.AddModelError(string.Empty, error.Description);
@@ -130,7 +162,7 @@ namespace MedService.Controllers
             }
 
             var doctor = await _context.Doctors
-                .Include(d => d.DoctorAvailabilities)  // Include DoctorAvailabilities to preselect the checkboxes
+                .Include(d => d.DoctorAvailabilities)
                 .FirstOrDefaultAsync(d => d.DoctorId == id);
 
             if (doctor == null)
@@ -138,14 +170,11 @@ namespace MedService.Controllers
                 return NotFound();
             }
 
-            // Отримати список спеціалізацій і доступних годин
             ViewData["SpecializationId"] = new SelectList(_context.Specializations, "SpecializationId", "SpecializationName", doctor.SpecializationId);
 
-            // Перевірка, чи є доступні години в базі даних
             var availabilities = await _context.Availabilities.ToListAsync();
             if (availabilities == null || !availabilities.Any())
             {
-                // Обробка випадку, якщо немає доступних годин
                 ModelState.AddModelError(string.Empty, "No available hours found.");
                 return View(doctor);
             }
@@ -178,14 +207,11 @@ namespace MedService.Controllers
                         return NotFound();
                     }
 
-                    // Update name and specialization only
                     existingDoctor.DoctorName = doctor.DoctorName;
                     existingDoctor.SpecializationId = doctor.SpecializationId;
 
-                    // Видалити попередні години
                     existingDoctor.DoctorAvailabilities.Clear();
 
-                    // Додати вибрані години
                     foreach (var availabilityId in AvailableHours)
                     {
                         var doctorAvailability = new DoctorAvailability
@@ -216,7 +242,6 @@ namespace MedService.Controllers
             ViewData["SpecializationId"] = new SelectList(_context.Specializations, "SpecializationId", "SpecializationName", doctor.SpecializationId);
             return View(doctor);
         }
-
 
         // GET: Doctors/Delete/5
         public async Task<IActionResult> Delete(string id)

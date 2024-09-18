@@ -21,19 +21,17 @@ namespace MedService.Controllers
             var doctor = _context.Doctors.SingleOrDefault(d => d.DoctorEmail == userEmail);
             if (doctor != null)
             {
-                // Redirect to the Edit action of DoctorsController
                 return RedirectToAction("Edit", "Doctors", new { id = doctor.DoctorId });
             }
 
             var patient = _context.Patients.SingleOrDefault(p => p.PatientEmail == userEmail);
             if (patient != null)
             {
-                return View("PatientAccount", patient);
+                return RedirectToAction("Edit", "Patients", new { id = patient.PatientId });
             }
 
             return RedirectToAction("Index", "Home");
         }
-
 
         [HttpPost]
         [Authorize]
@@ -92,7 +90,6 @@ namespace MedService.Controllers
 
             if (medicalCardFile != null)
             {
-                // Save the medical card file
                 var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/medical-cards", medicalCardFile.FileName);
                 using (var stream = new FileStream(filePath, FileMode.Create))
                 {
@@ -104,7 +101,5 @@ namespace MedService.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction("Account");
         }
-
     }
-
 }

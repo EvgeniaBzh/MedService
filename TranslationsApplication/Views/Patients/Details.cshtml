@@ -1,0 +1,64 @@
+﻿@model MedService.Models.Patient
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>Patient</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.PatientName)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.PatientName)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.PatientEmail)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.PatientEmail)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.PatientPassword)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.PatientPassword)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.DateOfBirth)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.DateOfBirth)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.PatientSex)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.PatientSex)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.MedicalCardFilePath)
+        </dt>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.MedicalCardFilePath)
+        </dt>
+        <dt class="col-sm-2">
+            Medical Card Content
+        </dt>
+        <dd class="col-sm-10">
+            <form asp-action="UpdateMedicalCard" method="post">
+                <textarea name="medicalCardContent" rows="10" class="form-control">@ViewData["MedicalCardContent"]</textarea>
+                <input type="hidden" name="id" value="@Model.PatientId" />
+                <input type="submit" value="Save Changes" class="btn btn-primary mt-2" />
+            </form>
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model?.PatientId">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>

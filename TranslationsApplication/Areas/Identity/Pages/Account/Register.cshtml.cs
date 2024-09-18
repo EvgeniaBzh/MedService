@@ -76,10 +76,6 @@ namespace MedService.Areas.Identity.Pages.Account
             [Display(Name = "Confirm password")]
             [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
             public string ConfirmPassword { get; set; }
-
-            [Required]
-            [Display(Name = "Role")]
-            public string Role { get; set; }
         }
 
         public async Task OnGetAsync(string returnUrl = null)
@@ -103,35 +99,38 @@ namespace MedService.Areas.Identity.Pages.Account
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User created a new account with password.");
-                    await _userManager.AddToRoleAsync(user, Input.Role);
+
+                    var defaultRole = "Patient";
+                    await _userManager.AddToRoleAsync(user, defaultRole);
 
                     var userId = await _userManager.GetUserIdAsync(user);
-                    switch (Input.Role.ToLower())
+                    var patient = new Patient
                     {
-                        case "patient":
-                            var patient = new Patient
-                            {
-                                PatientId = userId,
-                                PatientName = Input.Email,
-                                PatientEmail = Input.Email,
-                                PatientPassword = Input.Password 
-                            };
-                            _context.Patients.Add(patient);
-                            break;
-                        case "doctor":
-                            var doctor = new Doctor
-                            {
-                                DoctorId = userId,
-                                DoctorName = Input.Email,
-                                DoctorEmail = Input.Email,
-                                DoctorPassword = Input.Password 
-                            };
-                            _context.Doctors.Add(doctor);
-                            break;
+                        PatientId = userId,
+                        PatientName = Input.Email,
+                        PatientEmail = Input.Email,
+                        PatientPassword = Input.Password
+                    };
+                    _context.Patients.Add(patient);
+
+                    // Save patient first to get its ID
+                    await _context.SaveChangesAsync();
+                    _logger.LogInformation($"{defaultRole} data saved to the database.");
+
+                    // Create medical card
+                    string medicalCardDirectory = Path.Combine(Directory.GetCurrentDirectory(), "MedicalCards");
+                    if (!Directory.Exists(medicalCardDirectory))
+                    {
+                        Directory.CreateDirectory(medicalCardDirectory);
                     }
 
+                    string medicalCardFileName = $"{patient.PatientId}_MedicalCard.txt";
+                    string medicalCardFilePath = Path.Combine(medicalCardDirectory, medicalCardFileName);
+                    await System.IO.File.WriteAllTextAsync(medicalCardFilePath, "Medical card content here...");
+
+                    patient.MedicalCardFilePath = medicalCardFileName;
+                    _context.Update(patient);
                     await _context.SaveChangesAsync();
-                    _logger.LogInformation($"{Input.Role} data saved to the database.");
 
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
@@ -186,4 +185,5 @@ namespace MedService.Areas.Identity.Pages.Account
             return (IUserEmailStore<ApplicationUser>)_userStore;
         }
     }
+
 }
