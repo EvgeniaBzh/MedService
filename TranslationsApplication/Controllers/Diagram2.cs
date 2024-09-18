@@ -6,28 +6,28 @@ namespace MedService.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class Diagram2 : ControllerBase
+    public class Diagram2Controller : ControllerBase
     {
         private readonly DbMedServiceContext dbContext;
 
-        public Diagram2(DbMedServiceContext context)
+        public Diagram2Controller(DbMedServiceContext context)
         {
             dbContext = context;
         }
 
-        [HttpGet("orderTypeDistribution")]
-        public IActionResult GetOrderTypeDistribution()
+        [HttpGet("specializationDistribution")]
+        public IActionResult GetSpecializationDistribution()
         {
-            /*var result = dbContext.Orders
-                .GroupBy(o => o.Type.TypeName)
+            var result = dbContext.Doctors
+                .GroupBy(d => d.Specialization.SpecializationName)
                 .Select(group => new
                 {
-                    TypeName = group.Key,
+                    SpecializationName = group.Key,
                     Count = group.Count()
                 })
                 .ToList();
-*/
-            return Ok(/*result*/);
+
+            return Ok(result);
         }
     }
 }

@@ -65,15 +65,13 @@ namespace MedService.Controllers
                 return NotFound();
             }
 
-            // Filter availabilities where PatientId is null
             var availableTimes = doctor.DoctorAvailabilities
                 .Where(da => da.PatientId == null)
                 .ToList();
 
             ViewBag.AvailableTimes = availableTimes;
 
-            // Get the current logged-in patient's ID (if available)
-            var patientId = User.FindFirstValue(ClaimTypes.NameIdentifier); // or however you store the patient ID
+            var patientId = User.FindFirstValue(ClaimTypes.NameIdentifier); 
 
             ViewBag.PatientId = patientId;
 
@@ -93,7 +91,7 @@ namespace MedService.Controllers
 
             if (availability == null || availability.PatientId != null)
             {
-                return NotFound(); // or appropriate error message
+                return NotFound();
             }
 
             availability.PatientId = patientId;

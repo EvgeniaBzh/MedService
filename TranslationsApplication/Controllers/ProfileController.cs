@@ -53,7 +53,6 @@ namespace MedService.Controllers
 
             if (doctorPhoto != null)
             {
-                // Save the photo file
                 var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images", doctorPhoto.FileName);
                 using (var stream = new FileStream(filePath, FileMode.Create))
                 {

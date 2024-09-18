@@ -87,7 +87,7 @@ namespace MedService.Controllers
                             {
                                 AvailabilityId = Guid.NewGuid().ToString(),
                                 Day = day,
-                                Date = dateTime, // Use DateTime for both date and time
+                                Date = dateTime, 
                                 IsAvailable = true
                             };
 
