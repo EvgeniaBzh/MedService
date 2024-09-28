@@ -25,8 +25,8 @@
     }
 
     body {
+        background: url('../../MedService.jpg') no-repeat center center;
         margin-bottom: 60px;
-        /*background: url('../../css/ffonn4.jpg') no-repeat center center;*/
         background-size: cover;
         background-position: center;
         min-height: 100vh;
@@ -36,20 +36,22 @@
         padding-top: 174px;
     }
 
-    .btn-primary, .btn-secondary {
-        background-color: white;
-        color: #4A0D5B;
-        border: 1px solid transparent;
+    .btn-primary {
+        background-color: #548D9B;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 10px 20px;
+        font-weight: bold;
+        transition: background-color 0.3s ease;
     }
 
-        .btn-primary:hover, .btn-secondary:hover {
-            background-color: #888787;
-            color: white;
+        .btn-primary:hover {
+            background-color: #CEDFCC;
+            color: #548D9B;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
         }
 
-        .btn-primary:hover, .btn-secondary:hover {
-            color: white;
-        }
 
     .centered-form-container {
         display: flex;
@@ -72,6 +74,11 @@
         justify-content: center;
         margin-top: 60px;
     }
+
+    .register-link {
+        color: black;
+    }
+
 
 </style>
 
@@ -105,13 +112,15 @@
                     </label>
                 </div>
                 <div>
-                    <button id="login-submit" type="submit" class="w-100 btn btn-lg btn-primary">Log in</button>
+                        <button id="login-submit" type="submit" class="w-100 btn btn-lg btn-primary">Log in</button>
+
                 </div>
                 <div>
 
-                    <p>
-                        <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Register as a new user</a>
-                    </p>
+                        <p>
+                            <a class="register-link" asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Register as a new user</a>
+                        </p>
+
 
                 </div>
             </form>

@@ -22,6 +22,7 @@
             }         
 
             body {
+                background: url('MedService.jpg') no-repeat center center;
                 margin-bottom: 60px;
                 background-size: cover;
                 background-position: center;
@@ -32,20 +33,23 @@
                 padding-top: 174px;
             }
 
-            .btn-primary, .btn-secondary {
-                background-color: white;
-                color: #4A0D5B;
-                border: 1px solid transparent;
-            }
+        .btn-primary, .btn-secondary {
+            background-color: #548D9B; 
+            color: white; 
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px; 
+            font-weight: bold; 
+            transition: background-color 0.3s ease; 
+        }
 
             .btn-primary:hover, .btn-secondary:hover {
-                background-color: #888787;
-                color: white;
+                background-color: #CEDFCC;
+                color: white; 
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.3); 
+                color: #548D9B;
             }
 
-            .btn-primary:hover, .btn-secondary:hover {
-                color: white;
-            }
 
         </style>
     </head>
@@ -55,7 +59,6 @@
         <div class="text-center background-image buttons-container">
             <a class="btn btn-secondary" href="@Url.Action("Index", "Specializations")">View specializations</a>
             <a class="btn btn-secondary" href="@Url.Action("Index", "Doctors")">View doctors</a>
-            <a class="btn btn-secondary" href="@Url.Action("Index", "Patients")">View patients</a>
             <a class="btn btn-primary" href="@Url.Action("Index", "Availabilities")">View availability</a>
         </div>
     </div>

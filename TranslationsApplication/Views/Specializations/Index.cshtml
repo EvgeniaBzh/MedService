@@ -1,14 +1,77 @@
 ﻿@model IEnumerable<MedService.Models.Specialization>
 
 @{
-    ViewData["Title"] = "Specializations Distribution";
+    ViewData["Title"] = "Specializations";
 }
+
+<style>
+    html {
+        position: relative;
+        min-height: 100%;
+        font-size: 16px;
+    }
+
+    body {
+        background: url('../MedService (1).jpg') no-repeat center center;
+        margin-bottom: 60px;
+        background-size: cover; 
+        min-height: 100vh;
+    }
+
+
+
+    .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+        box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+    }
+
+    .btn-primary, .btn-secondary {
+        background-color: #548D9B; 
+        color: white; 
+        border: none;
+        border-radius: 5px;
+        padding: 10px 20px; 
+        font-weight: bold; 
+        transition: background-color 0.3s ease; 
+    }
+
+    .btn-primary:hover, .btn-secondary:hover {
+        background-color: #CEDFCC;
+        color: #548D9B; 
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3); 
+    }
+
+    table {
+        background-color: rgba(255, 255, 255, 0.8);
+        border-radius: 8px; 
+        margin-bottom: 20px; 
+    }
+
+    th {
+        background-color: #548D9B;
+        color: white;
+    }
+
+    th, td {
+        padding: 10px;
+        text-align: left;
+    }
+
+    h2 {
+        margin-top: 30px; 
+    }
+
+    canvas {
+        border-radius: 8px; 
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); 
+    }
+</style>
 
 <h1>Specializations Distribution</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a class="btn btn-primary" asp-action="Create">Create New</a>
 </p>
+
 <table class="table">
     <thead>
         <tr>
@@ -26,8 +89,8 @@
                     @Html.DisplayFor(modelItem => item.SpecializationName)
                 </td>
                 <td>
-                    <a asp-action="Edit" asp-route-id="@item.SpecializationId">Edit</a> |
-                    <a asp-action="Delete" asp-route-id="@item.SpecializationId">Delete</a>
+                    <a class="btn btn-secondary" asp-action="Edit" asp-route-id="@item.SpecializationId">Edit</a> |
+                    <a class="btn btn-secondary" asp-action="Delete" asp-route-id="@item.SpecializationId">Delete</a>
                 </td>
             </tr>
         }
