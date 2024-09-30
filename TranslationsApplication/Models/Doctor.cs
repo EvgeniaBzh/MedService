@@ -17,8 +17,8 @@ public partial class Doctor
     public string? DoctorPhoto { get; set; } = null!;
 
     public int? SpecializationId { get; set; } = null!;
-    [JsonIgnore]
+
     public virtual Specialization? Specialization { get; set; } = null!;
-    [JsonIgnore]
+
     public virtual ICollection<DoctorAvailability> DoctorAvailabilities { get; set; } = new List<DoctorAvailability>();
 }

@@ -108,15 +108,12 @@ public partial class DbMedServiceContext : DbContext
                   .HasMaxLength(100);
 
             entity.Property(e => e.DoctorEmail)
-                  .IsRequired()
                   .HasMaxLength(100);
 
             entity.Property(e => e.DoctorPassword)
-                  .IsRequired()
                   .HasMaxLength(100);
 
             entity.Property(e => e.DoctorPhoto)
-                  .IsRequired()
                   .HasMaxLength(255);
 
             entity.HasOne(d => d.Specialization)

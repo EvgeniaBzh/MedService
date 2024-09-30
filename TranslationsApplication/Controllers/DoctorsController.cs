@@ -37,7 +37,7 @@ namespace MedService.Controllers
             {
                 if (doctor.Specialization == null)
                 {
-                    doctor.Specialization = new Specialization(); 
+                    doctor.Specialization = new Specialization();
                 }
             }
 
@@ -71,7 +71,7 @@ namespace MedService.Controllers
 
             ViewBag.AvailableTimes = availableTimes;
 
-            var patientId = User.FindFirstValue(ClaimTypes.NameIdentifier); 
+            var patientId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             ViewBag.PatientId = patientId;
 
