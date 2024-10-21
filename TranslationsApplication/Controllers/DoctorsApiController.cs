@@ -18,17 +18,39 @@ namespace MedService.Controllers
 
         // GET: api/DoctorsApi
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Doctor>>> GetDoctors()
+        public async Task<ActionResult<IEnumerable<Doctor>>> GetDoctors([FromQuery] int skip = 0, [FromQuery] int limit = 10)
         {
-            return await _context.Doctors.Include(d => d.Specialization).ToListAsync();
+            var totalItems = await _context.Doctors.CountAsync();
+            var doctors = await _context.Doctors
+                .Skip(skip)  
+                .Take(limit) 
+                .ToListAsync(); 
+
+            var nextLink = (skip + limit < totalItems) ?
+                Url.Action(nameof(GetDoctors), new { skip = skip + limit, limit = limit }) :
+                null;
+
+            var response = new
+            {
+                data = doctors,
+                pagination = new
+                {
+                    totalItems = totalItems,
+                    skip = skip,
+                    limit = limit,
+                    nextLink = nextLink
+                }
+            };
+
+            return Ok(response);
         }
 
         // GET: api/DoctorsApi/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Doctor>> GetDoctor(string id)
         {
-            var doctor = await _context.Doctors.Include(d => d.Specialization)
-                                               .FirstOrDefaultAsync(d => d.DoctorId == id);
+            var doctor = await _context.Doctors
+                                       .FirstOrDefaultAsync(d => d.DoctorId == id); 
 
             if (doctor == null)
             {
@@ -37,6 +59,7 @@ namespace MedService.Controllers
 
             return doctor;
         }
+
 
         // POST: api/DoctorsApi
         [HttpPost]

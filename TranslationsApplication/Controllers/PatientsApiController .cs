@@ -20,9 +20,31 @@ namespace MedService.Controllers
 
         // GET: api/PatientsApi
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Patient>>> GetPatients()
+        public async Task<ActionResult<IEnumerable<Patient>>> GetPatients([FromQuery] int skip = 0, [FromQuery] int limit = 10)
         {
-            return await _context.Patients.ToListAsync();
+            var totalItems = await _context.Patients.CountAsync();  
+            var patients = await _context.Patients
+                .Skip(skip)  
+                .Take(limit) 
+                .ToListAsync();  
+
+            var nextLink = (skip + limit < totalItems) ?
+                Url.Action(nameof(GetPatients), new { skip = skip + limit, limit = limit }) :
+                null;
+
+            var response = new
+            {
+                data = patients,
+                pagination = new
+                {
+                    totalItems = totalItems,
+                    skip = skip,
+                    limit = limit,
+                    nextLink = nextLink
+                }
+            };
+
+            return Ok(response);
         }
 
         // GET: api/PatientsApi/5

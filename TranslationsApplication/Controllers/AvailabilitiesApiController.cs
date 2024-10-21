@@ -20,9 +20,31 @@ namespace MedService.Controllers
 
         // GET: api/AvailabilitiesApi
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Availability>>> GetAvailabilities()
+        public async Task<ActionResult<IEnumerable<Availability>>> GetAvailabilities([FromQuery] int skip = 0, [FromQuery] int limit = 10)
         {
-            return await _context.Availabilities.ToListAsync();
+            var totalItems = await _context.Availabilities.CountAsync();
+            var availabilities = await _context.Availabilities
+                .Skip(skip)
+                .Take(limit)
+                .ToListAsync();
+
+            var nextLink = (skip + limit < totalItems) ?
+                Url.Action(nameof(GetAvailabilities), new { skip = skip + limit, limit = limit }) :
+                null;
+
+            var response = new
+            {
+                data = availabilities,
+                pagination = new
+                {
+                    totalItems = totalItems,
+                    skip = skip,
+                    limit = limit,
+                    nextLink = nextLink
+                }
+            };
+
+            return Ok(response);
         }
 
         // GET: api/AvailabilitiesApi/5

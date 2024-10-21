@@ -20,9 +20,31 @@ namespace MedService.Controllers
 
         // GET: api/SpecializationsApi
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Specialization>>> GetSpecializations()
+        public async Task<ActionResult<IEnumerable<Specialization>>> GetSpecializations([FromQuery] int skip = 0, [FromQuery] int limit = 10)
         {
-            return await _context.Specializations.ToListAsync();
+            var totalItems = await _context.Specializations.CountAsync();
+            var specializations = await _context.Specializations
+                .Skip(skip)  
+                .Take(limit) 
+                .ToListAsync();  
+
+            var nextLink = (skip + limit < totalItems) ?
+                Url.Action(nameof(GetSpecializations), new { skip = skip + limit, limit = limit }) :
+                null;
+
+            var response = new
+            {
+                data = specializations,
+                pagination = new
+                {
+                    totalItems = totalItems,
+                    skip = skip,
+                    limit = limit,
+                    nextLink = nextLink
+                }
+            };
+
+            return Ok(response);
         }
 
         // GET: api/SpecializationsApi/5
