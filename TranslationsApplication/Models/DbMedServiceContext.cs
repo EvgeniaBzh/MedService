@@ -80,20 +80,25 @@ public partial class DbMedServiceContext : DbContext
                   .HasMaxLength(100);
 
             entity.Property(e => e.DateOfBirth)
-                  .IsRequired(false); 
+                  .IsRequired(false);
 
             entity.Property(e => e.PatientSex)
-                  .IsRequired(false);  
+                  .IsRequired(false);
 
             entity.Property(e => e.MedicalCardFilePath)
                   .HasMaxLength(255);
+
+            entity.Property(e => e.Latitude)
+                  .IsRequired(false);
+
+            entity.Property(e => e.Longitude)
+                  .IsRequired(false);
 
             entity.HasMany(d => d.DoctorAvailabilities)
                   .WithOne(da => da.Patient)
                   .HasForeignKey(da => da.PatientId)
                   .OnDelete(DeleteBehavior.Cascade);
         });
-
 
         modelBuilder.Entity<Doctor>(entity =>
         {

@@ -232,5 +232,35 @@ namespace MedService.Controllers
         {
             return _context.Patients.Any(e => e.PatientId == id);
         }
+
+        // GET: Patients/Map
+        public IActionResult Map()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetPatientsCoordinates()
+        {
+            var patientCoordinates = await _context.Patients
+                .Where(p => p.Latitude.HasValue && p.Longitude.HasValue)
+                .Select(p => new
+                {
+                    p.PatientId,
+                    p.PatientName,
+                    Latitude = p.Latitude,
+                    Longitude = p.Longitude
+                })
+                .ToListAsync();
+
+            foreach (var patient in patientCoordinates)
+            {
+                Console.WriteLine($"Patient: {patient.PatientName}, Latitude: {patient.Latitude}, Longitude: {patient.Longitude}");
+            }
+
+            return Json(patientCoordinates);
+
+        }
+
     }
 }

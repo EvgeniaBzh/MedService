@@ -26,5 +26,8 @@ public partial class Patient
 
     public string? MedicalCardFilePath { get; set; }
 
+    public double? Latitude { get; set; }  // Широта
+    public double? Longitude { get; set; } // Довгота
+
     public virtual ICollection<DoctorAvailability> DoctorAvailabilities { get; set; } = new List<DoctorAvailability>();
 }

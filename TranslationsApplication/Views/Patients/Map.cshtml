@@ -1,0 +1,38 @@
+﻿@{
+    ViewData["Title"] = "Patient Map";
+}
+
+<h2>Patient Map</h2>
+
+<div id="map" style="width: 100%; height: 500px;"></div>
+
+<script src="https://api.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.js"></script>
+<link href="https://api.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.css" rel="stylesheet" />
+
+<script>
+    mapboxgl.accessToken = 'pk.eyJ1IjoieWV2aGVuaWlhYTYiLCJhIjoiY20ya3J1eXA5MDNwYjJ2cjJyaXp0NjhmaCJ9.z1SETfcFG4Q2ydvQT-LQ1g';
+
+    const map = new mapboxgl.Map({
+        container: 'map', 
+        style: 'mapbox://styles/mapbox/streets-v11',
+        center: [30.516, 50.4501], 
+        zoom: 10 
+    });
+
+    fetch('/Patients/GetPatientsCoordinates')
+        .then(response => response.json())
+        .then(data => {
+            data.forEach(patient => {
+                if (patient.latitude && patient.longitude) { 
+                    new mapboxgl.Marker()
+                        .setLngLat([patient.longitude, patient.latitude])
+                        .setPopup(new mapboxgl.Popup().setText(patient.PatientName))
+                        .addTo(map);
+                } else {
+                    console.error(`Invalid coordinates for patient: ${patient.PatientId}`);
+                }
+            });
+        })
+        .catch(error => console.error('Error fetching patient coordinates:', error));
+
+</script>
