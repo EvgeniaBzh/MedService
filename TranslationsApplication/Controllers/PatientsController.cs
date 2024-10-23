@@ -234,15 +234,43 @@ namespace MedService.Controllers
         }
 
         // GET: Patients/Map
-        public IActionResult Map()
+        public async Task<IActionResult> Map()
         {
+            var patients = await _context.Patients
+                .Where(p => p.Latitude.HasValue && p.Longitude.HasValue)
+                .ToListAsync();
+
+            ViewBag.Patients = new SelectList(patients, "PatientId", "PatientName");
             return View();
         }
 
+        // GET: Patients/GetPatientCoordinates/{id}
         [HttpGet]
-        public async Task<IActionResult> GetPatientsCoordinates()
+        public async Task<IActionResult> GetPatientCoordinates(string id)
         {
-            var patientCoordinates = await _context.Patients
+            var patient = await _context.Patients
+                .Where(p => p.PatientId == id && p.Latitude.HasValue && p.Longitude.HasValue)
+                .Select(p => new
+                {
+                    p.PatientId,
+                    p.PatientName,
+                    Latitude = p.Latitude,
+                    Longitude = p.Longitude
+                })
+                .FirstOrDefaultAsync();
+
+            if (patient == null)
+            {
+                return Json(null);
+            }
+
+            return Json(patient);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllPatientCoordinates()
+        {
+            var patients = await _context.Patients
                 .Where(p => p.Latitude.HasValue && p.Longitude.HasValue)
                 .Select(p => new
                 {
@@ -253,14 +281,7 @@ namespace MedService.Controllers
                 })
                 .ToListAsync();
 
-            foreach (var patient in patientCoordinates)
-            {
-                Console.WriteLine($"Patient: {patient.PatientName}, Latitude: {patient.Latitude}, Longitude: {patient.Longitude}");
-            }
-
-            return Json(patientCoordinates);
-
+            return Json(patients);
         }
-
     }
 }

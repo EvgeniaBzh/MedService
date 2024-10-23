@@ -186,5 +186,16 @@ namespace MedService.Controllers
         {
             return (_context.Specializations?.Any(e => e.SpecializationId == id)).GetValueOrDefault();
         }
+
+        [HttpGet]
+        public IActionResult GetSpecializations(string term)
+        {
+            var specializations = _context.Specializations
+                .Where(s => s.SpecializationName.Contains(term))
+                .Select(s => new { id = s.SpecializationId, text = s.SpecializationName })
+                .ToList();
+            return Json(specializations);
+        }
+
     }
 }

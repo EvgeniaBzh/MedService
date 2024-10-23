@@ -1,47 +1,89 @@
 ﻿@model MedService.Models.Availability
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Create Availability";
 }
 
-<h1>Create</h1>
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <style>
+        body {
+            background: url('../../MedService (1).jpg') no-repeat center center;
+            background-size: cover;
+            min-height: 100vh;
+            color: black;
+        }
 
-<h4>Availability</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create" method="post">
-            <div>
-                <label>Day of the week</label>
-                <select name="day">
-                    <option value="0">Sunday</option>
-                    <option value="1">Monday</option>
-                    <option value="2">Tuesday</option>
-                    <option value="3">Wednesday</option>
-                    <option value="4">Thursday</option>
-                    <option value="5">Friday</option>
-                    <option value="6">Saturday</option>
-                </select>
-            </div>
-            <div>
-                <label>Start Time (hour)</label>
-                <input type="number" name="startTime" min="0" max="23" />
-            </div>
-            <div>
-                <label>End Time (hour)</label>
-                <input type="number" name="endTime" min="1" max="24" />
-            </div>
-            <button type="submit">Create Availabilities</button>
-        </form>
+        .btn-custom {
+            background-color: #548D9B;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
 
+            .btn-custom:hover {
+                background-color: #CEDFCC;
+                color: #548D9B;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            }
+    </style>
+</head>
 
+<div class="container mt-4">
+    <header class="text-center mb-4">
+        <h1>Create Availability</h1>
+        <h4>Availability Details</h4>
+        <hr />
+    </header>
+
+    <div class="row">
+        <div class="col-md-4 offset-md-4">
+            <form asp-action="Create" method="post">
+                <div class="form-group mb-3">
+                    <label for="day-input">Day of the week</label>
+                    <input type="text" name="dayInput" id="day-input" class="form-control" placeholder="Enter day of the week" />
+                </div>
+                <div class="form-group mb-3">
+                    <label for="startTime">Start Time (hour)</label>
+                    <input type="number" name="startTime" min="0" max="23" class="form-control" />
+                </div>
+                <div class="form-group mb-3">
+                    <label for="endTime">End Time (hour)</label>
+                    <input type="number" name="endTime" min="1" max="24" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-custom">Create Availabilities</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <a asp-action="Index" class="btn btn-secondary">Back to List</a>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        $(document).ready(function () {
+            var daysOfWeek = [
+                "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
+            ];
+
+            $("#day-input").autocomplete({
+                source: daysOfWeek,
+                minLength: 3,
+                select: function (event, ui) {
+                    console.log("Selected: " + ui.item.value);
+                }
+            });
+        });
+    </script>
 }

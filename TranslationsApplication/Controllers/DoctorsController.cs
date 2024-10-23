@@ -168,7 +168,8 @@ namespace MedService.Controllers
                 return NotFound();
             }
 
-            ViewData["SpecializationId"] = new SelectList(_context.Specializations, "SpecializationId", "SpecializationName", doctor.SpecializationId);
+            // Populate the ViewBag with available specializations
+            ViewBag.SpecializationId = new SelectList(_context.Specializations, "SpecializationId", "SpecializationName", doctor.SpecializationId);
 
             var availabilities = await _context.Availabilities.ToListAsync();
             if (availabilities == null || !availabilities.Any())

@@ -1,8 +1,17 @@
-﻿@{
-    ViewData["Title"] = "Patient Map";
-}
+﻿<h2>Patient Map</h2>
 
-<h2>Patient Map</h2>
+<div>
+    <label for="patientSelect">Select Patient:</label>
+    <select id="patientSelect" class="form-control">
+        <option value="">Select a patient</option>
+        @foreach (var item in ViewBag.Patients)
+        {
+            <option value="@item.Value">@item.Text</option>
+        }
+    </select>
+</div>
+
+<button id="showAllPatients" class="btn btn-primary mt-3">Show All Patients</button>
 
 <div id="map" style="width: 100%; height: 500px;"></div>
 
@@ -13,26 +22,73 @@
     mapboxgl.accessToken = 'pk.eyJ1IjoieWV2aGVuaWlhYTYiLCJhIjoiY20ya3J1eXA5MDNwYjJ2cjJyaXp0NjhmaCJ9.z1SETfcFG4Q2ydvQT-LQ1g';
 
     const map = new mapboxgl.Map({
-        container: 'map', 
+        container: 'map',
         style: 'mapbox://styles/mapbox/streets-v11',
-        center: [30.516, 50.4501], 
-        zoom: 10 
+        center: [30.516, 50.4501],
+        zoom: 10
     });
 
-    fetch('/Patients/GetPatientsCoordinates')
-        .then(response => response.json())
-        .then(data => {
-            data.forEach(patient => {
-                if (patient.latitude && patient.longitude) { 
-                    new mapboxgl.Marker()
-                        .setLngLat([patient.longitude, patient.latitude])
-                        .setPopup(new mapboxgl.Popup().setText(patient.PatientName))
-                        .addTo(map);
-                } else {
-                    console.error(`Invalid coordinates for patient: ${patient.PatientId}`);
-                }
-            });
-        })
-        .catch(error => console.error('Error fetching patient coordinates:', error));
+    let currentMarker;
+    let allMarkers = [];
 
+    document.getElementById('patientSelect').addEventListener('change', function () {
+        const selectedPatientId = this.value;
+
+        if (currentMarker) {
+            currentMarker.remove();
+        }
+
+        if (selectedPatientId) {
+            fetch(`/Patients/GetPatientCoordinates/${selectedPatientId}`)
+                .then(response => response.json())
+                .then(patient => {
+                    if (patient) {
+                        currentMarker = new mapboxgl.Marker()
+                            .setLngLat([patient.longitude, patient.latitude])
+                            .setPopup(new mapboxgl.Popup().setText(patient.PatientName))
+                            .addTo(map);
+
+                        map.flyTo({
+                            center: [patient.longitude, patient.latitude],
+                            zoom: 12,
+                            essential: true 
+                        });
+                    } else {
+                        console.error('Patient not found or has no coordinates');
+                    }
+                })
+                .catch(error => console.error('Error fetching patient coordinates:', error));
+        }
+    });
+
+    document.getElementById('showAllPatients').addEventListener('click', function () {
+        allMarkers.forEach(marker => marker.remove());
+        allMarkers = [];
+
+        fetch('/Patients/GetAllPatientCoordinates')
+            .then(response => response.json())
+            .then(patients => {
+                if (patients && patients.length > 0) {
+                    patients.forEach(patient => {
+                        const marker = new mapboxgl.Marker()
+                            .setLngLat([patient.longitude, patient.latitude])
+                            .setPopup(new mapboxgl.Popup().setText(patient.PatientName))
+                            .addTo(map);
+
+                        allMarkers.push(marker);
+                    });
+
+                    const bounds = new mapboxgl.LngLatBounds();
+                    allMarkers.forEach(marker => bounds.extend(marker.getLngLat()));
+
+                    map.fitBounds(bounds, {
+                        padding: 50
+                    });
+                } else {
+                    console.error('No patients found with coordinates');
+                }
+            })
+            .catch(error => console.error('Error fetching all patients:', error));
+    });
 </script>
+

@@ -55,7 +55,7 @@ namespace MedService.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(DayOfWeek day, int startTime, int endTime)
+        public async Task<IActionResult> Create(string dayInput, int startTime, int endTime)
         {
             if (startTime >= endTime)
             {
@@ -63,11 +63,17 @@ namespace MedService.Controllers
                 return View();
             }
 
+            DayOfWeek day;
+            if (!Enum.TryParse<DayOfWeek>(dayInput, true, out day))
+            {
+                ModelState.AddModelError("dayInput", "Invalid day of the week.");
+                return View();
+            }
+
             var availabilityList = new List<Availability>();
 
             var startDate = DateTime.Today;
             var endDate = startDate.AddDays(182);
-
             var currentDate = startDate;
 
             while (currentDate <= endDate)
@@ -77,7 +83,6 @@ namespace MedService.Controllers
                     for (var time = startTime; time < endTime; time++)
                     {
                         var dateTime = new DateTime(currentDate.Year, currentDate.Month, currentDate.Day, time, 0, 0);
-
                         var existingAvailability = await _context.Availabilities
                             .AnyAsync(a => a.Day == day && a.Date == dateTime);
 
@@ -87,7 +92,7 @@ namespace MedService.Controllers
                             {
                                 AvailabilityId = Guid.NewGuid().ToString(),
                                 Day = day,
-                                Date = dateTime, 
+                                Date = dateTime,
                                 IsAvailable = true
                             };
 
@@ -95,7 +100,6 @@ namespace MedService.Controllers
                         }
                     }
                 }
-
                 currentDate = currentDate.AddDays(1);
             }
 
@@ -112,7 +116,6 @@ namespace MedService.Controllers
 
             return RedirectToAction(nameof(Index));
         }
-
 
         // GET: Availabilities/Delete/5
         public async Task<IActionResult> Delete(string id)
