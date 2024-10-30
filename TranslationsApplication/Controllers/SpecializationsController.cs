@@ -6,25 +6,53 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MedService.Infrastructure.Services;
+using Microsoft.Extensions.Caching.Memory;
 using MedService.Models;
+using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace MedService.Controllers
 {
     public class SpecializationsController : Controller
     {
         private readonly DbMedServiceContext _context;
+        private readonly IMemoryCache _memoryCache;
 
-        public SpecializationsController(DbMedServiceContext context)
+        public SpecializationsController(DbMedServiceContext context, IMemoryCache memoryCache)
         {
             _context = context;
+            _memoryCache = memoryCache;
         }
 
         // GET: Types
         public async Task<IActionResult> Index()
         {
+            var specializations = await GetCachedSpecializationsWithDoctorsAsync();
+            return View(specializations);
+
+            /*
             return _context.Specializations != null ?
                         View(await _context.Specializations.ToListAsync()) :
-                        Problem("Entity set 'DbMedServiceContext.Specializations'  is null.");
+                        Problem("Entity set 'DbMedServiceContext.Specializations' is null.");
+            */
+        }
+
+        private async Task<List<Specialization>> GetCachedSpecializationsWithDoctorsAsync()
+        {
+            string cacheKey = "specializations_with_doctors";
+
+            if (!_memoryCache.TryGetValue(cacheKey, out List<Specialization> specializations))
+            {
+                specializations = await _context.Specializations
+                    .Include(s => s.Doctors) 
+                    .ToListAsync();
+
+                var cacheOptions = new MemoryCacheEntryOptions()
+                    .SetSlidingExpiration(TimeSpan.FromMinutes(10));
+
+                _memoryCache.Set(cacheKey, specializations, cacheOptions);
+            }
+
+            return specializations;
         }
 
         // GET: Types/Details/5
@@ -71,6 +99,9 @@ namespace MedService.Controllers
 
                 _context.Add(specialization);
                 await _context.SaveChangesAsync();
+
+                _memoryCache.Remove("specializations_with_doctors");
+
                 return RedirectToAction(nameof(Index));
             }
             return View(specialization);
@@ -118,6 +149,8 @@ namespace MedService.Controllers
                 {
                     _context.Update(specialization);
                     await _context.SaveChangesAsync();
+
+                    _memoryCache.Remove("specializations_with_doctors");
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -177,6 +210,8 @@ namespace MedService.Controllers
                 _context.Specializations.Remove(specialization);
 
                 await _context.SaveChangesAsync();
+
+                _memoryCache.Remove("specializations_with_doctors");
             }
 
             return RedirectToAction(nameof(Index));
