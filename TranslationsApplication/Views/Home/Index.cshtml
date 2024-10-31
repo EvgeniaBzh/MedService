@@ -1,15 +1,14 @@
-﻿
-@{
+﻿@{
     ViewData["Title"] = "Med Service";
 }
 <html>
     <head>
         <style>
-        html {
-            position: relative;
-            min-height: 100%;
-            font-size: 16px;
-        }
+            html {
+                position: relative;
+                min-height: 100%;
+                font-size: 16px;
+            }
 
             @@media (min-width: 768px) {
                 html {
@@ -33,15 +32,15 @@
                 padding-top: 174px;
             }
 
-        .btn-primary, .btn-secondary {
-            background-color: #548D9B; 
-            color: white; 
-            border: none;
-            border-radius: 5px;
-            padding: 10px 20px; 
-            font-weight: bold; 
-            transition: background-color 0.3s ease; 
-        }
+            .btn-primary, .btn-secondary {
+                background-color: #548D9B; 
+                color: white; 
+                border: none;
+                border-radius: 5px;
+                padding: 10px 20px; 
+                font-weight: bold; 
+                transition: background-color 0.3s ease; 
+            }
 
             .btn-primary:hover, .btn-secondary:hover {
                 background-color: #CEDFCC;
@@ -50,19 +49,35 @@
                 color: #548D9B;
             }
 
+            .image-container {
+                position: absolute;
+                right: 20px; 
+                bottom: 200px; 
+            }
 
+            .image-container img {
+                max-width: 150px; 
+                height: auto;
+                border-radius: 10px; 
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            }
         </style>
     </head>
     <body>
-    <div class="text-center background-image">
+        <div class="text-center background-image">
+            <div class="text-center background-image buttons-container">
+                <a class="btn btn-secondary" href="@Url.Action("Index", "Specializations")">View specializations</a>
+                <a class="btn btn-secondary" href="@Url.Action("Index", "Doctors")">View doctors</a>
+                <a class="btn btn-primary" href="@Url.Action("Index", "Availabilities")">View availability</a>
+                <a class="btn btn-primary" href="@Url.Action("Map", "Patients")">View Map</a>
+            </div>
 
-        <div class="text-center background-image buttons-container">
-            <a class="btn btn-secondary" href="@Url.Action("Index", "Specializations")">View specializations</a>
-            <a class="btn btn-secondary" href="@Url.Action("Index", "Doctors")">View doctors</a>
-            <a class="btn btn-primary" href="@Url.Action("Index", "Availabilities")">View availability</a>
-            <a class="btn btn-primary" href="@Url.Action("Map", "Patients")">View Map</a>
-
+            @if (ViewBag.ImageUrl != null)
+            {
+                <div class="image-container">
+                    <img src="@ViewBag.ImageUrl" alt="Uploaded Image" />
+                </div>
+            }
         </div>
-    </div>
     </body>
 </html>

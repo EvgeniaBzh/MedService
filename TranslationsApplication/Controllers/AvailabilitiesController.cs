@@ -6,27 +6,51 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MedService.Models;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace MedService.Controllers
 {
     public class AvailabilitiesController : Controller
     {
         private readonly DbMedServiceContext _context;
+        private readonly IMemoryCache _memoryCache;
 
-        public AvailabilitiesController(DbMedServiceContext context)
+        public AvailabilitiesController(DbMedServiceContext context, IMemoryCache memoryCache)
         {
             _context = context;
+            _memoryCache = memoryCache;
         }
 
         // GET: Availabilities
         public async Task<IActionResult> Index()
         {
-            var availabilities = await _context.Availabilities
+            /*var availabilities = await _context.Availabilities
                 .OrderBy(a => a.Day)   
                 .ThenBy(a => a.Date)   
-                .ToListAsync();
-
+                .ToListAsync();*/
+            var availabilities = await GetCachedAvailabilitiesAsync();
             return View(availabilities);
+        }
+
+        private async Task<List<Availability>> GetCachedAvailabilitiesAsync()
+        {
+            string cacheKey = "availabilities_with_doctors";
+
+            if (!_memoryCache.TryGetValue(cacheKey, out List<Availability> availabilities))
+            {
+                availabilities = await _context.Availabilities
+                    .Include(a => a.DoctorAvailabilities) 
+                    .OrderBy(a => a.Day)
+                    .ThenBy(a => a.Date)
+                    .ToListAsync();
+
+                var cacheOptions = new MemoryCacheEntryOptions()
+                    .SetSlidingExpiration(TimeSpan.FromMinutes(10));
+
+                _memoryCache.Set(cacheKey, availabilities, cacheOptions);
+            }
+
+            return availabilities;
         }
 
         // GET: Availabilities/Details/5
@@ -107,6 +131,8 @@ namespace MedService.Controllers
             {
                 _context.Availabilities.AddRange(availabilityList);
                 await _context.SaveChangesAsync();
+
+                _memoryCache.Remove("savailabilities_with_doctors");
             }
             else
             {
@@ -147,6 +173,9 @@ namespace MedService.Controllers
             }
 
             await _context.SaveChangesAsync();
+
+            _memoryCache.Remove("savailabilities_with_doctors");
+
             return RedirectToAction(nameof(Index));
         }
 

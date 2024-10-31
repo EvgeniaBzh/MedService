@@ -9,6 +9,7 @@ using MedService.Models;
 using MedService.Data.Identity;
 using Microsoft.AspNetCore.Identity;
 using System.Text;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace MedService.Controllers
 {
@@ -16,18 +17,42 @@ namespace MedService.Controllers
     {
         private readonly DbMedServiceContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IMemoryCache _memoryCache;
 
-        public PatientsController(DbMedServiceContext context, UserManager<ApplicationUser> userManager)
+        public PatientsController(DbMedServiceContext context, UserManager<ApplicationUser> userManager, IMemoryCache memoryCache)
         {
             _context = context;
             _userManager = userManager;
+            _memoryCache = memoryCache;
         }
 
         // GET: Patients
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Patients.ToListAsync());
+            var patients = await GetCachedPatientsWithMedicalCardsAsync();
+            return View(patients);
         }
+
+        private async Task<List<Patient>> GetCachedPatientsWithMedicalCardsAsync()
+        {
+            string cacheKey = "patients";
+
+            if (!_memoryCache.TryGetValue(cacheKey, out List<Patient> patients))
+            {
+                patients = await _context.Patients
+                    .Include(p => p.DoctorAvailabilities) 
+                    .ToListAsync();
+
+                var cacheOptions = new MemoryCacheEntryOptions()
+                    .SetSlidingExpiration(TimeSpan.FromMinutes(10));
+
+                // Store in cache
+                _memoryCache.Set(cacheKey, patients, cacheOptions);
+            }
+
+            return patients;
+        }
+
 
         // GET: Patients/Details/5
         public async Task<IActionResult> Details(string id)
@@ -83,8 +108,6 @@ namespace MedService.Controllers
             return RedirectToAction(nameof(Details), new { id });
         }
 
-
-
         // GET: Patients/Create
         public IActionResult Create()
         {
@@ -129,7 +152,9 @@ namespace MedService.Controllers
 
                     patient.MedicalCardFilePath = medicalCardFileName;
                     _context.Update(patient);
-                    await _context.SaveChangesAsync(); 
+                    await _context.SaveChangesAsync();
+
+                    _memoryCache.Remove("patients");
 
                     return RedirectToAction(nameof(Index));
                 }
@@ -178,6 +203,8 @@ namespace MedService.Controllers
                 {
                     _context.Update(patient);
                     await _context.SaveChangesAsync();
+
+                    _memoryCache.Remove("patients");
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -225,6 +252,8 @@ namespace MedService.Controllers
             }
 
             await _context.SaveChangesAsync();
+
+            _memoryCache.Remove("patients");
             return RedirectToAction(nameof(Index));
         }
 

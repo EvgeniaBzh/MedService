@@ -9,11 +9,10 @@ using MedService.Infrastructure.Services;
 using MedService.Controllers;
 using Microsoft.AspNetCore.Localization;
 using System.Globalization;
-using MedService.Data.Identity;
-using MedService.Extensions;
-using MedService.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddSingleton(new BlobService(builder.Configuration.GetConnectionString("AzureBlobStorage")));
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 {

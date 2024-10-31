@@ -1,20 +1,25 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using MedService.Models;
+using MedService.Infrastructure.Services;
 
 namespace MedService.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly BlobService _blobService;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, BlobService blobService)
         {
             _logger = logger;
+            _blobService = blobService;
         }
 
         public IActionResult Index()
         {
+            string imageUrl = _blobService.GetBlobUrl("newcontainer", "image3.jpg");
+            ViewBag.ImageUrl = imageUrl; 
             return View();
         }
 

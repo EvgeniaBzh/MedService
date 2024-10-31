@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.WebUtilities;
 using System.Text.Encodings.Web;
 using System.Text;
 using System.Security.Claims;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace MedService.Controllers
 {
@@ -19,19 +20,19 @@ namespace MedService.Controllers
     {
         private readonly DbMedServiceContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IMemoryCache _memoryCache;
 
-        public DoctorsController(DbMedServiceContext context, UserManager<ApplicationUser> userManager)
+        public DoctorsController(DbMedServiceContext context, UserManager<ApplicationUser> userManager, IMemoryCache memoryCache)
         {
             _context = context;
             _userManager = userManager;
+            _memoryCache = memoryCache;
         }
 
         // GET: Doctors
         public async Task<IActionResult> Index()
         {
-            var dbMedServiceContext = _context.Doctors.Include(d => d.Specialization);
-
-            var doctors = await dbMedServiceContext.ToListAsync();
+            var doctors = await GetCachedDoctorsWithSpecializationsAsync();
 
             foreach (var doctor in doctors)
             {
@@ -44,6 +45,26 @@ namespace MedService.Controllers
             var specializations = _context.Specializations.ToList();
             ViewData["SpecializationId"] = new SelectList(specializations, "SpecializationId", "SpecializationName");
             return View(doctors);
+        }
+
+
+        private async Task<List<Doctor>> GetCachedDoctorsWithSpecializationsAsync()
+        {
+            string cacheKey = "doctors_with_specializations";
+
+            if (!_memoryCache.TryGetValue(cacheKey, out List<Doctor> doctors))
+            {
+                doctors = await _context.Doctors
+                    .Include(d => d.Specialization)
+                    .ToListAsync();
+
+                var cacheOptions = new MemoryCacheEntryOptions()
+                    .SetSlidingExpiration(TimeSpan.FromMinutes(10));
+
+                _memoryCache.Set(cacheKey, doctors, cacheOptions);
+            }
+
+            return doctors;
         }
 
         // GET: Doctors/Details/5
@@ -136,6 +157,8 @@ namespace MedService.Controllers
                     _context.Add(doctor);
                     await _context.SaveChangesAsync();
 
+                    _memoryCache.Remove("doctors_with_specializations");
+
                     return RedirectToAction(nameof(Index));
                 }
                 else
@@ -168,7 +191,6 @@ namespace MedService.Controllers
                 return NotFound();
             }
 
-            // Populate the ViewBag with available specializations
             ViewBag.SpecializationId = new SelectList(_context.Specializations, "SpecializationId", "SpecializationName", doctor.SpecializationId);
 
             var availabilities = await _context.Availabilities.ToListAsync();
@@ -179,6 +201,7 @@ namespace MedService.Controllers
             }
 
             ViewBag.Availabilities = availabilities;
+
 
             return View(doctor);
         }
@@ -222,6 +245,8 @@ namespace MedService.Controllers
                     }
 
                     _context.Update(existingDoctor);
+
+                    _memoryCache.Remove("doctors_with_specializations");
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -273,6 +298,9 @@ namespace MedService.Controllers
             }
 
             await _context.SaveChangesAsync();
+
+            _memoryCache.Remove("doctors_with_specializations");
+
             return RedirectToAction(nameof(Index));
         }
 
